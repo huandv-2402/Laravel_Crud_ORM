@@ -6,6 +6,8 @@
 
 
 
+
+
 @section('content')
 
 <h1 class="h3 mb-3"><strong>THÊM MỚI DANH MỤC</strong></h1>
@@ -17,13 +19,13 @@
             <form action="{{route('admin.categories.store')}}" method="POST" class="mb-3" enctype="multipart/form-data">
                 @csrf
                 <div class="mb-3">
-                    <label for="" class="form-label"><b>Tên danh mục</b>@if(session('error')!==NULL)<span style="color: red; font-size: 10px;">{{session('error')['name']['error']}}</span>@endif</label>
-                    <input type="text" name="name" class="form-control" value="@if(session('name')!==NULL){{session('name')}}@endif">
+                    <label for="" class="form-label"><b>Tên danh mục</b>@error('name')<span style="color: red; font-size: 10px;">{{$message}}</span>@enderror</label>
+                    <input type="text" name="name" class="form-control" value="{{old('name')}}">
                 </div>
 
 
                 <div class="mb-3">
-                    <label for="" class="form-label"><b>Ảnh danh mục</b>@if(session('error')!==NULL)<span style="color: red; font-size: 10px;">{{session('error')['image']['error']}}</span>@endif</label>
+                    <label for="" class="form-label"><b>Ảnh danh mục</b>@error('image')<span style="color: red; font-size: 10px;">{{$message}}</span>@enderror</label>
                     <input type="file" name="image" class="form-control">
                 </div>
 

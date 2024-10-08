@@ -19,16 +19,15 @@ Thêm mới sản phẩm
 
                 <div class="mb-3 d-flex">
                     <div class="col-6 me-2">
-                        <label for="" class="form-label"><b>Tên sản phẩm</b>@if(session('error')!==NULL)<span style="color: red; font-size: 10px;">{{session('error')['name']['error']}}</span>@endif</label>
-                        <input type="text" name="name" class="form-control" value="@if(session('name')!==NULL){{session('name')}}@endif">
+                        <label for="" class="form-label"><b>Tên sản phẩm</b>@error('name')<span style="color: red; font-size: 10px;">{{$message}}</span>@enderror</label>
+                        <input type="text" name="name" class="form-control" value="{{old('name')}}">
                     </div>
                     <div class="col-6">
-                        <label for="" class="form-label"><b>Danh mục</b></label>
+                        <label for="" class="form-label"><b>Danh mục</b>@error('category_id')<span style="color: red; font-size: 10px;">{{$message}}</span>@enderror</label>
                         <select name="category_id" id="" class="form-select">
                             <option value="{{$temp->id}}">Chưa phân loại</option>
                             @foreach($categories as $category)
-                            <option @if(session('category_id') !=NULL && session('category_id')==$category->id)
-                            selected @endif value="{{$category->id}}">{{$category->name}}</option>
+                            <option {{old('category_id')==$category->id?"selected":""}} value="{{$category->id}}">{{$category->name}}</option>
                             @endforeach
                         </select>
                     </div>
@@ -36,25 +35,25 @@ Thêm mới sản phẩm
 
                 <div class="mb-3 d-flex">
                     <div class="col-6 me-2">
-                        <label for="" class="form-label"><b>Số lượng</b>@if(session('error')!==NULL)<span style="color: red; font-size: 10px;">{{session('error')['quantity']['error']}}</span>@endif</label>
-                        <input type="number" name="quantity" class="form-control" value="@if(session('quantity')!==NULL){{session('quantity')}}@endif">
+                        <label for="" class="form-label"><b>Số lượng</b>@error('quantity')<span style="color: red; font-size: 10px;">{{$message}}</span>@enderror</label>
+                        <input type="number" name="quantity" class="form-control" value="{{old('quantity')}}">
                     </div>
                     <div class="col-6">
-                        <label for="" class="form-label"><b>Giá tiền</b>@if(session('error')!==NULL)<span style="color: red; font-size: 10px;">{{session('error')['price']['error']}}</span>@endif</label>
-                        <input type="number" name="price" class="form-control" value="@if(session('price')!==NULL){{session('price')}}@endif">
+                        <label for="" class="form-label"><b>Giá tiền</b>@error('price')<span style="color: red; font-size: 10px;">{{$message}}</span>@enderror</label>
+                        <input type="number" step="0.01" name="price" class="form-control" value="{{old('price')}}">
                     </div>
                 </div>
 
 
 
                 <div class="mb-3">
-                    <label for="" class="form-label"><b>Ảnh danh mục</b>@if(session('error')!==NULL)<span style="color: red; font-size: 10px;">{{session('error')['image']['error']}}</span>@endif</label>
+                    <label for="" class="form-label"><b>Ảnh danh mục</b>@error('image')<span style="color: red; font-size: 10px;">{{$message}}</span>@enderror</label>
                     <input type="file" name="image" class="form-control">
                 </div>
 
                 <div>
-                    <label for="" class="form-label"><b>Mô tả</b>@if(session('error')!==NULL)<span style="color: red; font-size: 10px;">{{session('error')['description']['error']}}</span>@endif</label>
-                    <textarea name="description" id="" rows="5" class="form-control">@if(session('description')!==NULL){{session('description')}}@endif</textarea>
+                    <label for="" class="form-label"><b>Mô tả</b>@error('description')<span style="color: red; font-size: 10px;">{{$message}}</span>@enderror</label>
+                    <textarea name="description" id="" rows="5" class="form-control">{{old('description')}}</textarea>
                 </div>
 
                 <div class="mt-5 text-center">

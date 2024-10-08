@@ -28,4 +28,12 @@ class Product extends Model
             return ($this -> Category) -> name;
         }
     }
+
+    public function CategoryId(){
+        if($this -> Category == NULL){
+            return 0;
+        }else{
+            return ($this -> Category) -> id;
+        }
+    }
 }

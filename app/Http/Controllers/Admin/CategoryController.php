@@ -5,25 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Http\Requests\RequestStoreCategory;
+use App\Http\Requests\RequestUpdateCategory;
 use App\Traits\ValidateCategory;
 
 
 class CategoryController extends Controller
 {
-
-    use ValidateCategory;
-
-
-    protected $error = [
-        "name" => [
-            "status" => false,
-            "error" => ""
-        ],
-        "image" => [
-            "status" => false,
-            "error" => ""
-        ],
-    ];
 
 
     /**
@@ -47,33 +35,17 @@ class CategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(RequestStoreCategory $request)
     {
-        $this->error["name"]["status"] = $this->validateName($request->input("name"), $this->error["name"]["error"]);
+        $requestData = $request->validated();
 
+        $imgUrl = time() . $requestData["image"]->getClientOriginalName();
+        $requestData["image"]->move(public_path("asset/img/Categories"),$imgUrl);
+        $requestData["image"] = $imgUrl;
 
-        if ($request->hasFile("image")) {
-            $this->error["image"]["status"] = true;
-        } else {
-            $this->error["image"]["status"] = false;
-            $this->error["image"]["error"] = " * Ảnh không được bỏ trống";
-        }
+        $check = Category::create($requestData);
 
-        if ($this->error["image"]["status"] && $this->error["name"]["status"]) {
-            // Xử lý ảnh
-            $imageUrl = time() . $request->file("image")->getClientOriginalName();
-            $request->file("image")->move(public_path('asset/img/Categories'), $imageUrl);
-
-            $check = Category::create([
-                "name" => $request->input("name"),
-                "image" => $imageUrl
-            ]);
-
-            return redirect(route("admin.categories.index"))->with(["add" => $check]);
-        } else {
-
-            return redirect(route('admin.categories.create'))->with(["error" => $this->error, "name" => $request->input("name")]);
-        }
+        return redirect(route("admin.categories.index"))->with(["add" => $check]);
     }
 
     /**
@@ -95,34 +67,32 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(RequestUpdateCategory $request, string $id)
     {
-        $this->error["name"]["status"] = $this->validateNameUpdate($request->input("name"), $this->error["name"]["error"]);
+        
+        // $request -> setCategoryId($category->id);
 
-        if ($this->error["name"]["status"]) {
-            $category = Category::find($id);
-            $imageUrl = $category->image;
+        $requestData = $request->validated();
+        // dd($requestData);
 
-            if ($request->hasFile("image")) {
+        $category = Category::find($id);
 
-                // Xử lý ảnh
-                $imageUrl = time() . $request->file("image")->getClientOriginalName();
-                $request->file("image")->move(public_path('asset/img/Categories'), $imageUrl);
-                if ($category->image !== "avatar-2.jpg") {
-                    unlink(public_path('asset/img/Categories/') . $category->image);
-                }
+        if(count($requestData) == 2){
+            $imgUrl = $category -> image;
+
+            if($imgUrl != "avatar-2.jpg"){
+                unlink(public_path("asset/img/Categories/" . $imgUrl));
             }
-
-            $category->name = $request->input("name");
-            $category->image = $imageUrl;
-
-            $check = $category->save();
-
-
-            return redirect(route('admin.categories.index'))->with(["update" => $check]);
-        } else {
-            return redirect(route('admin.categories.edit', ['category' => $id]))->with(["error" => $this->error, "name" => $request->input("name") ?? ""]);
+            $imgUrl = time() . $requestData["image"]->getClientOriginalName();
+            $requestData["image"]->move(public_path("asset/img/categories"),$imgUrl);
+            $category->image = $imgUrl; 
         }
+
+        $category ->name = $requestData["name"];
+
+        $check = $category->save();
+
+        return redirect(route("admin.categories.index"))->with(["update" => $check]);
     }
 
     /**

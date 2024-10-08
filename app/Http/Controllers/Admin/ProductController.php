@@ -7,35 +7,12 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Traits\ValidateProduct;
 use Illuminate\Http\Request;
-
+use App\Http\Requests\RequestStoreProduct;
+use App\Http\Requests\RequestUpdateProduct;
 
 class ProductController extends Controller
 {
 
-    use ValidateProduct;
-
-    protected $error = [
-        "name" => [
-            "status" => false,
-            "error" => ""
-        ],
-        "image" => [
-            "status" => false,
-            "error" => ""
-        ],
-        "description" => [
-            "status" => false,
-            "error" => ""
-        ],
-        "price" => [
-            "status" => false,
-            "error" => ""
-        ],
-        "quantity" => [
-            "status" => false,
-            "error" => ""
-        ]
-    ];
 
     /**
      * Display a listing of the resource.
@@ -56,8 +33,6 @@ class ProductController extends Controller
         }else{
             $products = Product::all();
         }
-
-        
 
         return view("admin/products/list",["products"=>$products, "categories" => $categories])->with(["search"=>$request->query("search"), "category_id" => $request->query("category_id")]);
     }
@@ -80,39 +55,16 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(RequestStoreProduct $request)
     {
-        $this -> error["name"]["status"] = $this -> validateName($request->input("name"),$this -> error["name"]["error"]);
-        $this -> error["description"]["status"] = $this -> validateDescription($request->input("description"),$this -> error["description"]["error"]);
-        $this -> error["price"]["status"] = $this -> validatePrice($request->input("price"),$this -> error["price"]["error"]);
-        $this -> error["quantity"]["status"] = $this -> validateQuantity($request->input("quantity"),$this -> error["quantity"]["error"]);
+        $requestData = $request->validated();
 
-        if($request -> hasFile("image")){
-            $this -> error["image"]["status"] = true;
-        }else{
-            $this -> error["image"]["status"] = false;
-            $this -> error["image"]["error"] = " * Ảnh không được bỏ trống";
-        }
+        $imgUrl = time() . $requestData["image"]->getClientOriginalName();
+        $requestData["image"]->move(public_path("asset/img/Products"),$imgUrl);
+        $requestData["image"] = $imgUrl;
 
-
-        if($this -> error["name"]["status"] && $this -> error["description"]["status"] && $this -> error["price"]["status"] && $this -> error["quantity"]["status"] && $this -> error["image"]["status"]){
-
-            $imgUrl = time() . $request->file("image")->getClientOriginalName();
-            $request->file("image")->move((public_path("asset/img/products")),$imgUrl);
-
-            $check = Product::create([
-                "name" => $request->input("name"),
-                "image" => $imgUrl,
-                "description" => $request->input("description"),
-                "price" => $request->input("price"),
-                "quantity" => $request->input("quantity"),
-                "category_id" => $request->input("category_id")
-            ]);
-            return redirect(route("admin.products.index"))->with(["add" => $check]);
-
-        }else{
-            return redirect(route('admin.products.create'))->with(["error" => $this -> error, "name" => $request->input("name"),"quantity"=>$request->input("quantity"),"price"=>$request->input("price"),"description"=>$request->input("description"),"category_id" => $request->input("category_id")]);
-        }
+        $check = Product::create($requestData);
+        return redirect(route('admin.products.index'))->with(["add" => $check]);
     }
 
     /**
@@ -143,39 +95,31 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(RequestUpdateProduct $request, string $id)
     {
-        $this -> error["name"]["status"] = $this -> validateNameUpdate($request->input("name"),$this -> error["name"]["error"]);
-        $this -> error["description"]["status"] = $this -> validateDescription($request->input("description"),$this -> error["description"]["error"]);
-        $this -> error["price"]["status"] = $this -> validatePrice($request->input("price"),$this -> error["price"]["error"]);
-        $this -> error["quantity"]["status"] = $this -> validateQuantity($request->input("quantity"),$this -> error["quantity"]["error"]);
+        $requestData = $request->validated();
 
-        if($this -> error["name"]["status"] && $this -> error["description"]["status"] && $this -> error["price"]["status"] && $this -> error["quantity"]["status"]){
-            $product = Product::find($id);
-            $imgUrl = $product->image;
-            
-            if($request->hasFile("image")){
-                $imgUrl = time() . $request->file("image")->getClientOriginalName();
-                $request->file("image")->move(public_path("asset/img/Products"),$imgUrl);
-                if($product->image !== "avatar-2.jpg"){
-                    unlink(public_path(public_path("asset/img/Products/" . $product->image)));
-                }
+        $product = Product::find($id);
+
+        if(count($requestData) == 6){
+            $imgUrl = $product -> image;
+            if($imgUrl != "avatar-2.jpg"){
+                unlink(public_path("asset/img/products/" / $imgUrl));
             }
-
-            $product->name = $request->input("name");
-            $product->category_id = $request->input("category_id");
-            $product->quantity = $request->input("quantity");
-            $product->price = $request->input("price");
+            $imgUrl = time() . $requestData["image"]->getClientOriginalName();
+            $requestData["image"]->move(public_path("asset/img/products"),$imgUrl);
             $product->image = $imgUrl;
-            $product->description = $request->input("description");
-
-            $check = $product->save();
-
-            return redirect(route('admin.products.index'))->with(["update" => $check]);
-
-        }else{
-            return redirect(route('admin.products.edit',["product" => $id]))->with(["error" => $this -> error, "name" => $request->input("name")??"","quantity"=>$request->input("quantity")??"","price"=>$request->input("price")??"","description"=>$request->input("description")??"", "category_id" => $request->input("category_id")]);
         }
+
+        $product->name = $requestData["name"];
+        $product->category_id = $requestData["category_id"];
+        $product->quantity = $requestData["quantity"];
+        $product->price = $requestData["price"];
+        $product->description = $requestData["description"];
+
+        $check = $product->save();
+        return redirect(route('admin.products.index'))->with(["update" => $check]);
+
     }
 
     /**
@@ -185,10 +129,8 @@ class ProductController extends Controller
     {
         $check = Product::find($id)->delete();
 
-        if($check){
-            return redirect(route('admin.products.index'))->with(["delete" => true]);
-        }else{
-            return redirect(route('admin.products.index'))->with(["delete" => false]);
-        }
+       
+        return redirect(route('admin.products.index'))->with(["delete" => $check]);
+
     }
 }
