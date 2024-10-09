@@ -97,14 +97,9 @@ Danh sách danh mục
             </tbody>
         </table>
         <div class="card-footer">
-            <ul class="pagination d-flex justify-content-center">
-
-                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-
-            </ul>
+            {{$categories->links()}}    
         </div>
+        
         @endif
     </div>
 

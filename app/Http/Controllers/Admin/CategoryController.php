@@ -19,7 +19,7 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $categories = Category::where("name", "like", "%" . $request->query("search") . "%")->get();
+        $categories = Category::where("name", "like", "%" . $request->query("search") . "%")->paginate(3);
 
         return view("Admin/Categories/list", ["categories" => $categories])->with("search", $request->query("search"));
     }
@@ -67,13 +67,10 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(RequestUpdateCategory $request, string $id)
+    public function update(string $id,RequestUpdateCategory $request)
     {
         
-        // $request -> setCategoryId($category->id);
-
         $requestData = $request->validated();
-        // dd($requestData);
 
         $category = Category::find($id);
 

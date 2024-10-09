@@ -23,15 +23,15 @@ class ProductController extends Controller
 
         // Chưa phân loại
         if($request->query("category_id") == "-1"){
-            $products = Product::where("name","like","%". $request->query("search") ."%")->whereIn("category_id",Category::onlyTrashed()->pluck("id"))->get();
+            $products = Product::where("name","like","%". $request->query("search") ."%")->whereIn("category_id",Category::onlyTrashed()->pluck("id"))->paginate(4);
         
         // Phân loại
         }elseif($request->query("category_id") != "0" && $request->query("category_id") != NULL){
-            $products = Product::where("name","like","%". $request->query("search") ."%")->where("category_id","=",$request->query("category_id"))->get();
+            $products = Product::where("name","like","%". $request->query("search") ."%")->where("category_id","=",$request->query("category_id"))->paginate(4);
 
         // Tất cả
         }else{
-            $products = Product::all();
+            $products = Product::paginate(4);
         }
 
         return view("admin/products/list",["products"=>$products, "categories" => $categories])->with(["search"=>$request->query("search"), "category_id" => $request->query("category_id")]);

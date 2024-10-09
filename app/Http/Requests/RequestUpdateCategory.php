@@ -4,18 +4,12 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+
 class RequestUpdateCategory extends FormRequest
 {
 
-    // public $categoryId;
+    
 
-    // public function setCategoryId($id){
-    //     return $this -> categoryId = $id;
-    // }
-
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         // return false;
@@ -27,11 +21,19 @@ class RequestUpdateCategory extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */ 
+
+    protected function prepareForValidation()
+    {
+        $this->merge(['id' => $this->route('category')]);
+    }
+
+
     public function rules(): array
     {
  
         return [
-            "name" => "required|min:8|max:150",
+            // "name" => "required|min:8|max:150",Rule::unique("categories","name")->ignore($this->categoryId,"id"),
+            "name" => "required|min:8|max:150|unique:categories,name," . $this->id,
             "image" => "image"
         ];
     }

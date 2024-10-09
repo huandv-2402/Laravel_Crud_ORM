@@ -21,11 +21,16 @@ class RequestUpdateProduct extends FormRequest
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
 
+
+    public function prepareForValidation(){
+        $this -> merge(["id" => $this->route('product')]);
+    }
+
     
     public function rules(): array
     {
         return [
-            "name" => "required|min:8|max:150",
+            "name" => "required|min:8|max:150|unique:products,name," . $this -> id,
             "quantity" => "required|min:1|integer",
             "price" => "required|min:0|numeric",
             "image" => "image",
@@ -40,6 +45,7 @@ class RequestUpdateProduct extends FormRequest
             "name.required" => " * Tên không được bỏ trống",
             "name.min" => " * Độ dài tên không được < 8 ký tụ",
             "name.max"=>" * Độ dài tên không được > 150 ký tự",
+            "name.unique" => " * Tên sản phẩm đã tồn tại",
             "image.image" => " * File gửi lên phải là file ảnh",
             "quantity.required" => " * Số lượng không được bỏ trống",
             "quantity.min" => " * Số lượng không được nhỏ hơn 0",
