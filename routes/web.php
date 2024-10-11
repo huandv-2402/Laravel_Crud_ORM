@@ -1,9 +1,6 @@
 <?php
 
-use App\Http\Controllers\Admin\AuthController;
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\ProductController;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,35 +15,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return 'Trang chủ CLient';
-})->name("index");
-
-
-
-// LOGIN ADMIN
-Route::group(["prefix"=>"admin", "as" => "admin.",'middleware' => 'checkLogoutAdmin'], function(){
-    Route::get("/login",[AuthController::class,"index"])->name("login.get");
-
-    Route::post("/login",[AuthController::class,"login"])->name("login.post");
-
+    return view('index');
 });
 
 
-
-// ADMIN
-Route::group(["prefix" => "admin","as" => "admin.",'middleware' => 'checkAdmin'], function(){
-
-    Route::get("/", function(){
-        return view("admin/index");
-    });
-
-    // category
-    Route::resource("categories",CategoryController::class);
-
-    // product
-    Route::resource("products",ProductController::class);
-
-    // Đăng xuất
-    Route::get("logout",[AuthController::class,"logout"])->name("logout");
- 
-});
+Route::resource('users',UserController::class);
